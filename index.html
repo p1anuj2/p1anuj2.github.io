@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anuj Attri — Research Scholar, IIT Delhi</title>
+<meta name="description" content="Anuj Attri — Research Scholar at IIT Delhi working on Vision-Language and Vision-Language-Action Models for Autonomous Driving.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,450;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0B0E13;
+    --paper:#EDEFF2;
+    --slate:#8A93A3;
+    --teal:#4FD8C4;
+    --amber:#F5A93F;
+    --hairline:#232833;
+    --panel:#11141B;
+    --maxw:920px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Inter', sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--teal); color:var(--ink); }
+
+  a{ color:var(--teal); text-decoration:none; }
+  a:hover{ text-decoration:underline; }
+  a:focus-visible, button:focus-visible{
+    outline:2px solid var(--teal);
+    outline-offset:3px;
+  }
+
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--teal);
+  }
+
+  /* ambient point-cloud grid */
+  .grid-field{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    opacity:0.35;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(79,216,196,0.16) 1px, transparent 1.6px);
+    background-size:26px 26px;
+    mask-image:radial-gradient(ellipse 70% 55% at 50% 10%, #000 0%, transparent 75%);
+  }
+
+  .wrap{
+    position:relative;
+    z-index:1;
+    max-width:var(--maxw);
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  /* corner-bracket motif — echoes a detection bounding box */
+  .bracket{
+    position:relative;
+  }
+  .bracket::before, .bracket::after,
+  .bracket .bl::before, .bracket .br::before{
+    content:"";
+    position:absolute;
+    width:12px; height:12px;
+    border:1.5px solid var(--teal);
+    opacity:0.85;
+  }
+  .bracket::before{ top:-1px; left:-1px; border-right:none; border-bottom:none; }
+  .bracket::after{ top:-1px; right:-1px; border-left:none; border-bottom:none; }
+  .bracket .bl::before{ bottom:-1px; left:-1px; border-right:none; border-top:none; position:absolute; }
+  .bracket .br::before{ bottom:-1px; right:-1px; border-left:none; border-top:none; position:absolute; }
+
+  header.hero{
+    min-height:92vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding-top:60px;
+    padding-bottom:60px;
+  }
+  .hero-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:22px;
+  }
+  .hero-tag .dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--amber);
+    box-shadow:0 0 8px var(--amber);
+  }
+  h1.name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(2.6rem, 7vw, 5rem);
+    line-height:1.02;
+    letter-spacing:-0.01em;
+    margin:0 0 18px 0;
+  }
+  h1.name em{
+    font-style:italic;
+    font-weight:450;
+    color:var(--teal);
+  }
+  .hero-role{
+    font-size:clamp(1.05rem, 2.4vw, 1.35rem);
+    color:var(--slate);
+    max-width:640px;
+    margin:0 0 34px 0;
+    font-weight:400;
+  }
+  .hero-role strong{ color:var(--paper); font-weight:500; }
+
+  .affiliations{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px 28px;
+    padding-top:28px;
+    border-top:1px solid var(--hairline);
+    max-width:720px;
+  }
+  .affiliations div{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.78rem;
+    color:var(--slate);
+  }
+  .affiliations span{ color:var(--paper); }
+
+  section{ padding:96px 0; border-top:1px solid var(--hairline); }
+  section:first-of-type{ border-top:none; }
+
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:44px;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .section-head h2{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(1.6rem, 4vw, 2.2rem);
+    margin:0;
+  }
+  .section-head .frame{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.72rem;
+    color:var(--slate);
+    letter-spacing:0.08em;
+  }
+
+  .lede{
+    font-size:1.08rem;
+    color:#C7CCD6;
+    max-width:680px;
+  }
+  .lede strong{ color:var(--paper); font-weight:600; }
+
+  /* timeline */
+  .timeline{ display:flex; flex-direction:column; }
+  .role{
+    display:grid;
+    grid-template-columns:150px 1fr;
+    gap:24px;
+    padding:26px 0;
+    border-top:1px solid var(--hairline);
+  }
+  .role:first-child{ border-top:1px solid var(--hairline); }
+  .role .when{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.78rem;
+    color:var(--teal);
+    padding-top:4px;
+  }
+  .role .org{
+    font-family:'Fraunces', serif;
+    font-size:1.25rem;
+    font-weight:600;
+    margin:0 0 4px 0;
+  }
+  .role .title{
+    color:var(--paper);
+    font-weight:500;
+    margin:0 0 8px 0;
+  }
+  .role .desc{ color:var(--slate); font-size:0.96rem; max-width:560px; }
+  .role .place{ color:var(--slate); font-size:0.85rem; }
+
+  @media (max-width: 640px){
+    .role{ grid-template-columns:1fr; gap:6px; }
+  }
+
+  /* publications */
+  .pub{
+    position:relative;
+    padding:28px 28px 28px 30px;
+    margin-bottom:22px;
+  }
+  .pub .idx{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.72rem;
+    color:var(--amber);
+    display:block;
+    margin-bottom:10px;
+  }
+  .pub h3{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    font-size:1.18rem;
+    line-height:1.35;
+    margin:0;
+    color:var(--paper);
+  }
+
+  /* skills */
+  .skill-groups{ display:grid; grid-template-columns:1fr 1fr; gap:36px; }
+  @media (max-width:640px){ .skill-groups{ grid-template-columns:1fr; } }
+  .skill-groups h4{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.72rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--slate);
+    margin:0 0 16px 0;
+  }
+  .tags{ display:flex; flex-wrap:wrap; gap:9px; }
+  .tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.8rem;
+    color:var(--paper);
+    border:1px solid var(--hairline);
+    padding:7px 12px;
+    border-radius:3px;
+    background:var(--panel);
+  }
+
+  /* education */
+  .edu{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:8px 20px;
+    padding:20px 0;
+    border-top:1px solid var(--hairline);
+    align-items:baseline;
+  }
+  .edu:last-child{ border-bottom:1px solid var(--hairline); }
+  .edu .school{ font-weight:600; font-size:1.02rem; }
+  .edu .deg{ color:var(--slate); font-size:0.92rem; grid-column:1; }
+  .edu .yr{ font-family:'JetBrains Mono', monospace; font-size:0.78rem; color:var(--teal); text-align:right; }
+
+  footer{
+    padding:90px 0 60px 0;
+  }
+  footer h2{
+    font-family:'Fraunces', serif;
+    font-size:clamp(1.8rem, 5vw, 2.6rem);
+    font-weight:600;
+    margin:0 0 22px 0;
+  }
+  .contact-links{
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    margin-bottom:60px;
+  }
+  .contact-links a{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.88rem;
+    color:var(--paper);
+    border:1px solid var(--hairline);
+    padding:12px 18px;
+    border-radius:3px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    transition:border-color 0.15s ease, color 0.15s ease;
+  }
+  .contact-links a:hover{
+    border-color:var(--teal);
+    color:var(--teal);
+    text-decoration:none;
+  }
+  .foot-meta{
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.72rem;
+    color:var(--slate);
+    border-top:1px solid var(--hairline);
+    padding-top:24px;
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-field" aria-hidden="true"></div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-tag">
+      <span class="dot"></span>
+      <span class="eyebrow">Kangra, Himachal Pradesh · Based in Delhi</span>
+    </div>
+    <h1 class="name">Anuj Attri<br><em>Research Scholar</em></h1>
+    <p class="hero-role">
+      Working on <strong>Vision-Language Models</strong> and <strong>Vision-Language-Action Models</strong>
+      for autonomous driving at IIT Delhi — bridging multimodal understanding, video-language
+      reasoning, and real-world perception.
+    </p>
+    <div class="affiliations">
+      <div>IIT Delhi — <span>PhD Scholar</span></div>
+      <div>LPU — <span>Ex-Assistant Professor</span></div>
+      <div>IISc Bangalore — <span>Ex-KIAC Intern</span></div>
+      <div>NIT Jalandhar — <span>MTech AI '25</span></div>
+    </div>
+  </header>
+
+  <section id="about">
+    <div class="section-head">
+      <h2>About</h2>
+      <span class="frame mono">01 / 05</span>
+    </div>
+    <p class="lede">
+      I'm a <strong>Research Scholar at the Indian Institute of Technology, Delhi</strong>,
+      where my work sits at the intersection of vision, language, and control — building
+      models that let autonomous systems understand a scene the way a person would describe it,
+      and act on that understanding. Before this, I taught as an <strong>Assistant Professor at
+      Lovely Professional University</strong> and spent a year as a <strong>KIAC Intern at the
+      Indian Institute of Science, Bangalore</strong>. My path here ran through an MTech in
+      Artificial Intelligence at NIT Jalandhar and a BTech in Computer Software Engineering
+      at Sri Sai University, Palampur.
+    </p>
+  </section>
+
+  <section id="experience">
+    <div class="section-head">
+      <h2>Experience</h2>
+      <span class="frame mono">02 / 05</span>
+    </div>
+    <div class="timeline">
+      <div class="role">
+        <div class="when">Jul 2026 —<br>Present</div>
+        <div>
+          <p class="org">Indian Institute of Technology, Delhi</p>
+          <p class="title">Research Scholar</p>
+          <p class="desc">Vision-Language Models and Vision-Language-Action Models for
+            autonomous driving.</p>
+          <p class="place">Delhi, India</p>
+        </div>
+      </div>
+      <div class="role">
+        <div class="when">Jun 2025 —<br>May 2026</div>
+        <div>
+          <p class="org">Lovely Professional University</p>
+          <p class="title">Assistant Professor</p>
+          <p class="desc">Taught and mentored undergraduate students in computing and AI.</p>
+          <p class="place">Phagwara, Punjab</p>
+        </div>
+      </div>
+      <div class="role">
+        <div class="when">May 2024 —<br>May 2025</div>
+        <div>
+          <p class="org">Indian Institute of Science (IISc)</p>
+          <p class="title">KIAC Intern</p>
+          <p class="desc">Applied AI research during a one-year internship.</p>
+          <p class="place">Bengaluru, Karnataka</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="publications">
+    <div class="section-head">
+      <h2>Publications</h2>
+      <span class="frame mono">03 / 05</span>
+    </div>
+    <div class="pubs bracket">
+      <span class="bl"></span><span class="br"></span>
+      <div class="pub">
+        <span class="idx mono">[ P.01 ]</span>
+        <h3>Temporal Hierarchies and Knowledge Graphs for Multi-Modal Video Language Understanding</h3>
+      </div>
+      <div class="pub">
+        <span class="idx mono">[ P.02 ]</span>
+        <h3>Unified Transformer Framework for Integrated Language Vision Understanding and Content Generation</h3>
+      </div>
+      <div class="pub">
+        <span class="idx mono">[ P.03 ]</span>
+        <h3>Online Assamese Handwritten Numerals Recognition</h3>
+      </div>
+      <div class="pub">
+        <span class="idx mono">[ P.04 ]</span>
+        <h3>Image Plagiarism Detection via Reverse Image Search</h3>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="section-head">
+      <h2>Focus &amp; Skills</h2>
+      <span class="frame mono">04 / 05</span>
+    </div>
+    <div class="skill-groups">
+      <div>
+        <h4>Core</h4>
+        <div class="tags">
+          <span class="tag">Vision-Language-Action Models</span>
+          <span class="tag">Vision-Language Models</span>
+          <span class="tag">AI for Research</span>
+          <span class="tag">University Teaching</span>
+        </div>
+      </div>
+      <div>
+        <h4>Research Areas</h4>
+        <div class="tags">
+          <span class="tag">Multimodal AI</span>
+          <span class="tag">Video-Language Understanding</span>
+          <span class="tag">Autonomous Driving</span>
+          <span class="tag">Knowledge Graphs</span>
+          <span class="tag">Computer Vision</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="education">
+    <div class="section-head">
+      <h2>Education</h2>
+      <span class="frame mono">05 / 05</span>
+    </div>
+    <div class="edu-list">
+      <div class="edu">
+        <div class="school">Indian Institute of Technology, Delhi</div>
+        <div class="yr">2026</div>
+        <div class="deg">Doctor of Philosophy — Multimodal AI &amp; Vision Language Models for Autonomous Driving</div>
+      </div>
+      <div class="edu">
+        <div class="school">Dr. B. R. Ambedkar NIT, Jalandhar</div>
+        <div class="yr">2023 — 2025</div>
+        <div class="deg">Master of Technology — Artificial Intelligence</div>
+      </div>
+      <div class="edu">
+        <div class="school">Sri Sai University, Palampur</div>
+        <div class="yr">2019 — 2023</div>
+        <div class="deg">Bachelor of Technology — Computer Software Engineering</div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <span class="eyebrow">Get in touch</span>
+    <h2>Let's talk research,<br>teaching, or collaboration.</h2>
+    <div class="contact-links">
+      <a href="mailto:anujattri.iitd@gmail.com">✉ anujattri.iitd@gmail.com</a>
+      <a href="https://www.linkedin.com/in/anujattri-746324423" target="_blank" rel="noopener">in/ LinkedIn</a>
+      <a href="https://github.com/p1anuj2" target="_blank" rel="noopener">⌥ GitHub</a>
+    </div>
+    <div class="foot-meta">
+      <span>© 2026 Anuj Attri</span>
+      <span>Delhi, India</span>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
